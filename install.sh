@@ -30,4 +30,4 @@ cd Docker
 sudo docker-compose up -d
 
 
-sudo chown -R www-data
+sudo chown -R www-data .
