@@ -1,3 +1,4 @@
+#/bin/bash
 # https://docs.docker.com/engine/install/ubuntu/
 
 # Updating system
@@ -29,5 +30,6 @@ cd Docker
 
 sudo docker-compose up -d
 
+cd ~
 
-sudo chown -R www-data .
+sudo chown -R www-data Docker
