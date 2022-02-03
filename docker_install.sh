@@ -16,5 +16,9 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io -y
 
 sudo usermod -aG docker $(whoami)
 
+git clone https://github.com/Andrii-Batyuk/Docker
 
+cd Docker
+
+docker-compose up -d
 
