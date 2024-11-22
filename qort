@@ -1,0 +1,69 @@
+version: '3.9'
+
+services:
+  wp:
+    image: wordpress:latest
+    container_name: wordpress-app
+    restart: unless-stopped
+    ports:
+      - 8080:80
+    volumes:
+      - ./config/php.conf.ini:/usr/local/etc/php/conf.d/conf.ini
+      - ./wp-app:/var/www/html
+      - ./plugin-name/trunk/:/var/www/html/wp-content/plugins/plugin-name # Plugin development
+      - ./theme-name/trunk/:/var/www/html/wp-content/themes/theme-name # Theme development
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress-site1user
+      WORDPRESS_DB_PASSWORD: JHJui7swedfokk243r5ojidsgsd
+      WORDPRESS_DB_NAME: wordpress-site1
+      VIRTUAL_HOST: qortia.com.ua,www.qortia.com.ua
+      LETSENCRYPT_HOST: qortia.com.ua,www.qortia.com.ua
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10.6.4-focal
+    command: '--default-authentication-plugin=mysql_native_password'
+    volumes:
+      - ./wp-data:/docker-entrypoint-initdb.d
+      - ./db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: somewordpress
+      MYSQL_DATABASE: wordpress-site1
+      MYSQL_USER: wordpress-site1user
+      MYSQL_PASSWORD: JHJui7swedfokk243r5ojidsgsd
+    expose:
+      - 3306
+
+  nginx:
+    container_name: nginx
+    image: nginxproxy/nginx-proxy
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./nginx/html:/usr/share/nginx/html
+      - ./nginx/certs:/etc/nginx/certs
+      - ./nginx/vhost:/etc/nginx/vhost.d
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  acme-companion:
+    container_name: acme-companion
+    image: nginxproxy/acme-companion
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./nginx/acme:/etc/acme.sh
+    environment:
+      DEFAULT_EMAIL: admin@qortia.com.ua
+
+volumes:
+  db_data:
